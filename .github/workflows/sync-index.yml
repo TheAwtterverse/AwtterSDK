@@ -1,0 +1,30 @@
+name: Sync index.json from source repo
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # every hour
+  workflow_dispatch:      # allow manual trigger
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout target repo
+        uses: actions/checkout@v4
+
+      - name: Download index.json from source
+        run: |
+          curl -sSL https://TheAwtterverse.github.io/Awtter-Space-Installer/index.json -o index.json
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "Alex Automation"
+          git config user.email "alex@shorkbytes.com"
+          git add index.json
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Update index.json from source"
+          git push
